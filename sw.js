@@ -8,6 +8,7 @@ self.addEventListener('install', e => {
         .then( cache => {
 
             return cache.addAll([
+                '/',
                 '/index.html',
                 '/css/styles.css',
                 '/img/main.jpg',
@@ -24,3 +25,14 @@ self.addEventListener('install', e => {
 });
 
 
+
+self.addEventListener('fetch', e => {
+
+
+
+    //1 - Cache Only
+    e.respondWith( caches.match( e.request ) );
+
+
+
+});
