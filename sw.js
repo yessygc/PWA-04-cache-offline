@@ -1,48 +1,26 @@
 
 
 
-self.addEventListener('fetch', event => {
+self.addEventListener('install', e => {
 
-    // const offlineResp = new Response(`
     
-    //    b   ienvenido a mi página web
+    const cacheProm = caches.open('cache-1')
+        .then( cache => {
 
-    //    Disculpa, para usarla necesitas internet
+            return cache.addAll([
+                '/index.html',
+                '/css/styles.css',
+                '/img/main.jpg',
+                'https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css',
+                '/js/app.js'
+            ]);
 
-    //`);
-
-    // const offlineResp = new Response (`
-    
-    // <!DOCTYPE html>
-    // <html lang="en">
-    // <head>
-    //     <meta charset="UTF-8">
-    //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    //     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    //     <title>Mi PWA</title>
-
-    // </head>
-    // <body class="container p-3">
-
-    // <h1>Offline Mode</h1>
-
-    // </body>
-    // </html>
-    
-    // `, {
-    //     headers: {
-    //         'Content-Type':'text/html'
-    //     }
-    // });
+        });
 
 
-    const OfflineResp = fetch( 'pages/offline.html' );
+        e.waitUntil( cacheProm );
 
-
-    const resp = fetch(event.request)
-                    .catch( () => OfflineResp );
-
-
-    event.respondWith( resp );
 
 });
+
+
