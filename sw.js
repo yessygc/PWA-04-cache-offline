@@ -63,29 +63,50 @@ self.addEventListener('install', e => {
 self.addEventListener('fetch', e => {
 
 
+    // 4- Cache with network update
+    // Rendimiento crítico - Siempre estarán un paso atrás
+    if ( e.request.url.include('bootstrap') ) {
+        return e.respondWith( caches.match( e.request ));
+    }
 
-    // 3 - Network with cache fallback
+    const respuesta = caches.open( CACHE_STATIC_NAME ).then( cache => {
 
-    const respuesta = fetch( e.request ).then( res => {
+        fetch( e.request ).then( newRes => 
+            cache.put( e.request, newRes ));
 
-        if ( !res ) return caches.match( e.request );
-
-        
-
-        caches.open( CACHE_DYNAMIC_NAME )
-            .then( cache => {
-                cache.put( e.request, res );
-                limpiarCache( CACHE_DYNAMIC_NAME, CACHE_DYNAMIC_LIMIT);
-            });
-
-        return res.clone();
-
-    }).catch( err => {
-        return caches.match( e.request );
+        return cache.match( e.request );
     });
 
 
+
+
+
     e.respondWith( respuesta );
+
+
+
+
+    // 3 - Network with cache fallback
+    // const respuesta = fetch( e.request ).then( res => {
+
+    //     if ( !res ) return caches.match( e.request );
+
+        
+
+    //     caches.open( CACHE_DYNAMIC_NAME )
+    //         .then( cache => {
+    //             cache.put( e.request, res );
+    //             limpiarCache( CACHE_DYNAMIC_NAME, CACHE_DYNAMIC_LIMIT);
+    //         });
+
+    //     return res.clone();
+
+    // }).catch( err => {
+    //     return caches.match( e.request );
+    // });
+
+
+    // e.respondWith( respuesta );
 
 
 
