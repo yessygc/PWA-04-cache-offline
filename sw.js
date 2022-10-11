@@ -1,9 +1,33 @@
 
 // const CACHE_NAME = 'cache-1';
-const CACHE_STATIC_NAME = 'statci-v1';
+const CACHE_STATIC_NAME = 'statci-v2';
 const CACHE_DYNAMIC_NAME = 'dynamic-v1';
 
 const CACHE_INMUTABLE_NAME = 'inmutable-v1';
+
+
+
+
+function limpiarCache( cacheName, numeroItems ){
+
+
+
+    caches.open( cacheName )
+        .then( cache => {
+
+            return cache.keys()
+                .then( keys => {
+
+                    if ( keys.length >numeroItems ) {
+                        cache.delete( keys[0] )
+                            .then( limpiarCache(cacheName, numeroItems) );
+                    }
+                
+                });
+
+
+        });
+}
 
 
 
@@ -51,6 +75,7 @@ self.addEventListener('fetch', e => {
                 caches.open( CACHE_DYNAMIC_NAME )
                     .then( cache => {
                         cache.put( e.request, newRes );
+                        limpiarCache( CACHE_DYNAMIC_NAME, 5 );
                     });
 
                 return newRes.clone();
