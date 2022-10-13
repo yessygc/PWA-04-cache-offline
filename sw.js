@@ -44,7 +44,8 @@ self.addEventListener('install', e => {
                 '/index.html',
                 '/css/styles.css',
                 '/img/main.jpg',
-                '/js/app.js'
+                '/js/app.js',
+                '/img/no-img.jpg'
             ]);
 
         });
@@ -62,26 +63,66 @@ self.addEventListener('install', e => {
 
 self.addEventListener('fetch', e => {
 
+    // 5- Cache & Network Race
 
-    // 4- Cache with network update
-    // Rendimiento crítico - Siempre estarán un paso atrás
-    if ( e.request.url.include('bootstrap') ) {
-        return e.respondWith( caches.match( e.request ));
-    }
+    const respuesta = new Promise( (resolve, reject) => {
 
-    const respuesta = caches.open( CACHE_STATIC_NAME ).then( cache => {
+        let rechazada = false;
 
-        fetch( e.request ).then( newRes => 
-            cache.put( e.request, newRes ));
+        const falloUnaVez = () => {
 
-        return cache.match( e.request );
+            if ( rechazada ) {
+
+                if ( /\.(png|jpg)$/i.test( e.request.url ) ) {
+
+                    resolve( caches.match('/img/no-image.jpg') );
+                } else {
+                    reject('No se encontro respuest');
+                }
+
+
+            } else {
+                rechazada = true;
+            }
+        };
+
+
+        fetch( e.request ).then( res => {
+
+            res.ok ? resolve(res) : falloUnaVez();
+
+            
+        }).catch( falloUnaVez );
+
+        caches.match( e.request ).then( res => {
+
+            res ? resolve( res ) : falloUnaVez();
+        }).catch( falloUnaVez );
     });
 
 
 
 
-
     e.respondWith( respuesta );
+
+
+
+    // 4- Cache with network update
+    // Rendimiento crítico - Siempre estarán un paso atrás
+    // if ( e.request.url.include('bootstrap') ) {
+    //     return e.respondWith( caches.match( e.request ));
+    // }
+
+    // const respuesta = caches.open( CACHE_STATIC_NAME ).then( cache => {
+
+    //     fetch( e.request ).then( newRes => 
+    //         cache.put( e.request, newRes ));
+
+    //     return cache.match( e.request );
+    // });
+
+
+    // e.respondWith( respuesta );
 
 
 
